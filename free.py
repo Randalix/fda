@@ -7,9 +7,25 @@ from fda import utils
 import hou
 reload(config)
 reload(utils)
+from sys import exit
 
+def savenode(node, path):
+    code = node.asCode(
+            brief=False,
+            recurse=True,
+            save_channels_only=False,
+            save_creation_commands=True,
+            save_keys_in_frames=False,
+            save_outgoing_wires=False,
+            save_parm_values_only=False,
+            save_spare_parms=True,
+            function_name=None
+            )
+    node_file = open(path, "w")
+    node_file.write(code)
+    node_file.close()
 
-def save(nodepath=None):
+def savenfda(nodepath=None):
     if not nodepath:
         selected = hou.selectedNodes()
         if selected:
@@ -17,27 +33,12 @@ def save(nodepath=None):
     if nodepath:
         node = hou.node(nodepath)
         name = node.name()
-        name_choice = hou.ui.readInput(message='Name FDA', buttons=('OK',), default_choice=1, close_choice=-1, help=None, title=None, initial_contents=name)
+        name_choice = hou.ui.readInput(message='Name FDA', buttons=('OK','Cancle'), default_choice=1, close_choice=-1, help=None, title=None, initial_contents=name)
         if name_choice[0]==0:
             name = name_choice[1]
-            if name == "/":
-                name = hou.hipFile.basename()
             path = config.lib /  name
             path=str(path.resolve())
-            code = node.asCode(
-                    brief=False,
-                    recurse=True,
-                    save_channels_only=False,
-                    save_creation_commands=True,
-                    save_keys_in_frames=False,
-                    save_outgoing_wires=False,
-                    save_parm_values_only=False,
-                    save_spare_parms=True,
-                    function_name=None
-                    )
-            node_file = open(path, "w")
-            node_file.write(code)
-            node_file.close()
+            savenode(node, path)
 
 
 def load(path):
@@ -56,7 +57,7 @@ def load(path):
 
 def savescene():
     name = hou.hipFile.basename()
-    name_choice = hou.ui.readInput(message='Name Scene', buttons=('OK',), default_choice=1, close_choice=-1, help=None, title=None, initial_contents=name)
+    name_choice = hou.ui.readInput(message='Name Scene', buttons=('OK','Cancle'), default_choice=1, close_choice=-1, help=None, title=None, initial_contents=name)
     if name_choice[0]==0:
         name = name_choice[1]
         folder = config.lib / name
@@ -65,20 +66,7 @@ def savescene():
             path = folder / net
             path=str(path.resolve())
             node = hou.node('/' + net)
-            code = node.asCode(
-                    brief=False,
-                    recurse=True,
-                    save_channels_only=False,
-                    save_creation_commands=True,
-                    save_keys_in_frames=False,
-                    save_outgoing_wires=False,
-                    save_parm_values_only=False,
-                    save_spare_parms=True,
-                    function_name=None
-                    )
-            node_file = open(path, "w")
-            node_file.write(code)
-            node_file.close()
+            savenode(node, path)
 
 def loadscene(path):
     for net in config.savenetworks:
