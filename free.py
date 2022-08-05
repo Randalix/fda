@@ -6,8 +6,7 @@ from imp import reload
 from fda import utils
 import hou
 reload(config)
-# home=Path.home()
-# lib=home / "fda"
+reload(utils)
 
 
 def save():
@@ -34,11 +33,20 @@ def save():
         lines = lines[15:]
         lines = create_node + lines
         new_code = "\n".join(lines)
-        # new_code = "import jotools as jt\nreload(jt)\nnet = jt.currentNetworkEditor()\nhou_parent = net.pwd()\n" + new_code
         node_file = open(path, "w")
         node_file.write(new_code)
         node_file.close()
 
-def creat(path):
-    pass
+def load(path):
+    parent = str(utils.currentNetworkEditor().pwd().parent())
+    file = open(path, "r")
+
+    coderead = file.read()
+    code = f"###########\nhou_parenthou_parent=hou.node('{parent}')"
+
+     
+    print('//////////////////////////////////////')
+    print(code)
+    print(coderead)
+
 

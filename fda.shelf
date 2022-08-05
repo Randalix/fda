@@ -7,40 +7,37 @@
 
   <toolshelf name="fda" label="fda">
     <memberTool name="test"/>
-    <memberTool name="save"/>
+    <memberTool name="Save"/>
+    <memberTool name="Load"/>
   </toolshelf>
 
   <tool name="test" label="Test" icon="PLASMA_App">
-    <script scriptType="python"><![CDATA[# Free Hda create by Johanne Heintz
-# from fda import open
-from fda import config
+    <script scriptType="python"><![CDATA[import toolutils
+editor=toolutils.networkEditor()
+path=editor.pwd().parent()
+if path:
+    editor.cd(path.path())
+]]></script>
+  </tool>
+
+  <tool name="Save" label="Save" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[# Free Digital Assets create by Johanne Heintz
 from fda import free
 from imp import reload
 reload(config)
 reload(free)
-# reload(fda)
-# print(str(config.fdalib))
-
 free.save()
-#<!--printj(fda.config))-->
-
-
-
-# reload(fda)
-# open.open('/mnt/caches/houdini/Beach/hip/Beach_asCode.py')
-# print("yolo")
 
         ]]></script>
   </tool>
 
-  <tool name="save" label="Save" icon="PLASMA_App">
-    <script scriptType="python"><![CDATA[# Free Hda create by Johanne Heintz
+  <tool name="Load" label="Load" icon="PLASMA_App">
+      <script scriptType="python"><![CDATA[
 from fda import free
 from imp import reload
-reload(config)
 reload(free)
-free.save()
-
-        ]]></script>
+free.load("/home/j/fda/Beach")
+]]>
+      </script>
   </tool>
 </shelfDocument>
