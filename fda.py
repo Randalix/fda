@@ -1,18 +1,12 @@
 import os
-import hou
-import config
-from pathlib import Path
-from imp import reload
-reload(config)
 
 def save():
     selected = hou.selectedNodes()
     if (selected != None):
         node = selected[-1]
-
-        dir = config.lib
+        dir = os.path.dirname(hou.hipFile.path())
         name = node.name()
-        path = dir / name + "_asCode.py"
+        path = dir + "/" + name + "_asCode.py"
         code = node.asCode(False, True)
         lines = code.split("\n")
         lines = lines[3:]
@@ -26,3 +20,4 @@ def save():
         node_file.close()
         path = os.path.abspath(path)
         open(path)
+
