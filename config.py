@@ -1,4 +1,5 @@
 from pathlib import Path
 home=Path.home()
 
-fdalib=home / "fda"
+lib=home / "fda"
+lib.mkdir(parents=True, exist_ok=True)

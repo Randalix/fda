@@ -7,20 +7,39 @@
 
   <toolshelf name="fda" label="fda">
     <memberTool name="test"/>
+    <memberTool name="save"/>
   </toolshelf>
 
   <tool name="test" label="Test" icon="PLASMA_App">
-      <script scriptType="python"><![CDATA[# Free Hda create by Johanne Heintz
+    <script scriptType="python"><![CDATA[# Free Hda create by Johanne Heintz
 # from fda import open
 from fda import config
+from fda import free
 from imp import reload
 reload(config)
-print(str(config.fdalib))
+reload(free)
+# reload(fda)
+# print(str(config.fdalib))
+
+free.save()
+#<!--printj(fda.config))-->
+
 
 
 # reload(fda)
 # open.open('/mnt/caches/houdini/Beach/hip/Beach_asCode.py')
 # print("yolo")
+
+        ]]></script>
+  </tool>
+
+  <tool name="save" label="Save" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[# Free Hda create by Johanne Heintz
+from fda import free
+from imp import reload
+reload(config)
+reload(free)
+free.save()
 
         ]]></script>
   </tool>
