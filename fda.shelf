@@ -12,10 +12,16 @@
   <tool name="test" label="Test" icon="PLASMA_App">
       <script scriptType="python"><![CDATA[# Free Hda create by Johanne Heintz
 # from fda import open
-from fda import config
+from fda import fda
 from imp import reload
+from fda import config
 reload(config)
-print(str(config.fdalib))
+print(config.lib)
+# reload(fda)
+# fda.save()
+
+# reload(config)
+# print(str(config.fdalib))
 
 
 # reload(fda)
