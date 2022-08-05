@@ -35,12 +35,20 @@ def getfdatype():
     fdatype = parent.childTypeCategory().name()
     return fdatype
 
-def collapseselection():
+def collapseselection(fdaname='tmp'):
     selection = hou.selectedNodes()
     if selection:
         parent = getparent()
-        subnet = parent.createNode("subnet", 'tmp', True)
+        subnet = parent.createNode("subnet", fdaname, True)
         hou.copyNodesTo(selection, subnet)
+        subnet.setSelected(True)
         return subnet
+
+def extractsubnet():
+    subnet = hou.selectedNodes()[0]
+    parent = subnet.parent()
+    children = subnet.children()
+    hou.copyNodesTo(children, parent)
+    subnet.destroy()
 
 

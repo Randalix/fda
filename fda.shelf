@@ -12,6 +12,7 @@
     <memberTool name="Save Scene"/>
     <memberTool name="Load Scene"/>
     <memberTool name="FDA Menu"/>
+    <memberTool name="Collapse to Subnet"/>
   </toolshelf>
 
   <tool name="test" label="Test" icon="PLASMA_App">
@@ -87,5 +88,12 @@ from imp import reload
 reload(free)
 free.savefda()
 ]]></script>
+  </tool>
+
+  <tool name="Collapse to Subnet" label="Collapse to Subnet" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[from fda import utils
+from imp import reload
+reload(utils)
+utils.collapseselection()]]></script>
   </tool>
 </shelfDocument>

@@ -9,7 +9,7 @@ reload(config)
 reload(utils)
 from sys import exit
 
-def savenode(node, path, loose=False):
+def savenode(node, path):
     path=str(path.resolve())
     code = node.asCode(
             brief=False,
@@ -27,10 +27,13 @@ def savenode(node, path, loose=False):
     node_file.close()
 
 def savefda(nodepath=None):
+    loose=False
     if not nodepath:
         selected = hou.selectedNodes()
         if selected:
             nodepath = selected[-1].path()
+            if len(selected)>1:
+                loose=True
     if nodepath:
         node = hou.node(nodepath)
         fdaname= node.name()
@@ -42,10 +45,21 @@ def savefda(nodepath=None):
             folder = config.lib / fdatype / fdaname
             folder.mkdir(parents=True, exist_ok=True)
             path = folder /  fdaname
+            if loose:
+                loosemark = folder /  '.loose'
+                loose_file = open(loosemark, "w")
+                loose_file.write("")
+                loose_file.close()
+                node = utils.collapseselection(fdaname)
             savenode(node, path)
+            if loose:
+                node.destroy()
+
+
 
 
 def loadfda(path):
+    folder = Path(path).parent
     parent = utils.getparent()
     file = open(path, "r")
     coderead = file.read()
@@ -55,9 +69,14 @@ def loadfda(path):
         move = f"hou_node.move(hou.Vector2({mouse_pos}))"
         lines = coderead.split("\n")
         lines[6] = move
+        lines = lines[3:]
         coderead ='\n'.join(lines)
-    code = f"###########\nhou_parent=hou.node('{parent}')\n{coderead}"
+    code = f"hou_parent=hou.node('{parent.path()}')\n{coderead}"
     exec(code)
+    loosepath = folder / '.loose'
+    if loosepath.is_file():
+        utils.extractsubnet()
+
 
 def savescene():
     fdaname= hou.hipFile.basename()
@@ -83,7 +102,6 @@ def fdamenu():
     from subprocess import run, PIPE
     fdatype = utils.getfdatype()
     folder = config.lib / fdatype
-    print(folder)
     availablefda = os.listdir(str(folder))
     menuin = "\n".join(availablefda)
     p = run(['menu'], stdout=PIPE,
