@@ -1,6 +1,6 @@
 import os
 
-def saveAsCode():
+def save():
     selected = hou.selectedNodes()
     if (selected != None):
         node = selected[-1]
@@ -19,4 +19,5 @@ def saveAsCode():
         node_file.write(new_code)
         node_file.close()
         path = os.path.abspath(path)
+        open(path)
 

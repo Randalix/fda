@@ -11,11 +11,17 @@
 
   <tool name="test" label="Test" icon="PLASMA_App">
       <script scriptType="python"><![CDATA[# Free Hda create by Johanne Heintz
-from fda import open
+# from fda import open
+from fda import config
 from imp import reload
-reload(fda)
-open.open('/mnt/caches/houdini/Beach/hip/Beach_asCode.py')
-print("yolo")
+reload(config)
+print(str(config.fdalib))
+
+
+# reload(fda)
+# open.open('/mnt/caches/houdini/Beach/hip/Beach_asCode.py')
+# print("yolo")
+
         ]]></script>
   </tool>
 </shelfDocument>
