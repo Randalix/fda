@@ -7,7 +7,7 @@
 
   <toolshelf name="fda" label="fda">
     <memberTool name="test"/>
-    <memberTool name="Save"/>
+    <memberTool name="Save FDA"/>
     <memberTool name="Load"/>
     <memberTool name="Save Scene"/>
     <memberTool name="Load Scene"/>
@@ -18,14 +18,6 @@
     <script scriptType="python"><![CDATA[import toolutils
 editor=toolutils.networkEditor()
 print(editor)]]></script>
-  </tool>
-
-  <tool name="Save" label="Save" icon="PLASMA_App">
-    <script scriptType="python"><![CDATA[from fda import free
-from imp import reload
-reload(free)
-free.save()
-]]></script>
   </tool>
 
   <tool name="Load" label="Load" icon="PLASMA_App">
@@ -73,6 +65,14 @@ free.loadscene("/home/j/fda/Beach_006_recoverd_001.hiplc")]]></script>
 from imp import reload
 reload(free)
 free.fdamenu()
+]]></script>
+  </tool>
+
+  <tool name="Save FDA" label="Save FDA" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[from fda import free
+from imp import reload
+reload(free)
+free.save()
 ]]></script>
   </tool>
 </shelfDocument>
