@@ -14,30 +14,27 @@
   <tool name="test" label="Test" icon="PLASMA_App">
     <script scriptType="python"><![CDATA[import toolutils
 editor=toolutils.networkEditor()
-path=editor.pwd().parent()
-if path:
-    editor.cd(path.path())
-]]></script>
+print(editor)]]></script>
   </tool>
 
   <tool name="Save" label="Save" icon="PLASMA_App">
-    <script scriptType="python"><![CDATA[# Free Digital Assets create by Johanne Heintz
-from fda import free
+    <script scriptType="python"><![CDATA[from fda import free
 from imp import reload
-reload(config)
 reload(free)
 free.save()
-
-        ]]></script>
+]]></script>
   </tool>
 
   <tool name="Load" label="Load" icon="PLASMA_App">
-      <script scriptType="python"><![CDATA[
+    <toolMenuContext name="network">
+      <contextNetType>OBJ</contextNetType>
+      <contextNetType>SOP</contextNetType>
+    </toolMenuContext>
+    <script scriptType="python"><![CDATA[
 from fda import free
 from imp import reload
 reload(free)
-free.load("/home/j/fda/Beach")
-]]>
-      </script>
+free.load("/home/j/fda/Human")
+]]></script>
   </tool>
 </shelfDocument>

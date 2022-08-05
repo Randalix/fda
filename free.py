@@ -27,26 +27,26 @@ def save():
                 save_spare_parms=True,
                 function_name=None
                 )
-        lines = code.split("\n")
-        lines = lines[3:]
-        create_node = lines[:3]
-        lines = lines[15:]
-        lines = create_node + lines
-        new_code = "\n".join(lines)
+        # lines = code.split("\n")
+        # lines = lines[3:]
+        # create_node = lines[:3]
+        # lines = lines[15:]
+        # lines = create_node + lines
+        # new_code = "\n".join(lines)
         node_file = open(path, "w")
-        node_file.write(new_code)
+        node_file.write(code)
         node_file.close()
 
 def load(path):
-    parent = str(utils.currentNetworkEditor().pwd().parent())
+    parent = utils.getparent().path()
     file = open(path, "r")
-
     coderead = file.read()
-    code = f"###########\nhou_parenthou_parent=hou.node('{parent}')"
-
-     
-    print('//////////////////////////////////////')
-    print(code)
-    print(coderead)
-
-
+    net = utils.currentNetworkEditor()
+    if net:
+        mouse_pos = utils.currentNetworkEditor().cursorPosition()
+        move = f"hou_node.move(hou.Vector2({mouse_pos}))"
+        lines = coderead.split("\n")
+        lines[6] = move
+        coderead ='\n'.join(lines)
+    code = f"###########\nhou_parent=hou.node('{parent}')\n{coderead}"
+    exec(code)

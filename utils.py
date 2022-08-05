@@ -21,3 +21,13 @@ def currentNetworkEditor():
     return editor
 
 
+
+def getparent():
+    if hou.selectedNodes():
+        parent=hou.selectedNodes()[-1].parent()
+    else:
+        parent = currentNetworkEditor().pwd()
+    return parent
+
+
+
