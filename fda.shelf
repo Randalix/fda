@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<shelfDocument>
+  <!-- This file contains definitions of shelves, toolbars, and tools.
+ It should not be hand-edited when it is being used by the application.
+ Note, that two definitions of the same element are not allowed in
+ a single file. -->
+
+  <toolshelf name="fda" label="fda">
+    <memberTool name="test"/>
+  </toolshelf>
+
+  <tool name="test" label="Test" icon="PLASMA_App">
+      <script scriptType="python"><![CDATA[# Free Hda create by Johanne Heintz
+from fda import open
+from imp import reload
+reload(fda)
+open.open('/mnt/caches/houdini/Beach/hip/Beach_asCode.py')
+print("yolo")
+        ]]></script>
+  </tool>
+</shelfDocument>
