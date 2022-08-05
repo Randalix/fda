@@ -3,3 +3,5 @@ home=Path.home()
 
 lib=home / "fda"
 lib.mkdir(parents=True, exist_ok=True)
+savenetworks = ["obj", "mat", "task", "stage", "img", "shop", "out", "chop",]
+
