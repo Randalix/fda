@@ -25,18 +25,22 @@ def savenode(node, path):
     node_file.write(code)
     node_file.close()
 
-def savenfda(nodepath=None):
+def savefda(nodepath=None):
     if not nodepath:
         selected = hou.selectedNodes()
         if selected:
             nodepath = selected[-1].path()
     if nodepath:
         node = hou.node(nodepath)
-        name = node.name()
-        name_choice = hou.ui.readInput(message='Name FDA', buttons=('OK','Cancle'), default_choice=1, close_choice=-1, help=None, title=None, initial_contents=name)
+        fdaname= node.name()
+        name_choice = hou.ui.readInput(message='fdanameFDA', buttons=('OK','Cancle'), default_choice=1, close_choice=-1, help=None, title=None, initial_contents=fdaname)
         if name_choice[0]==0:
-            name = name_choice[1]
-            path = config.lib /  name
+            parent = utils.getparent()
+            fdaname= name_choice[1]
+            fdatype = parent.childTypeCategory().name()
+            folder = config.lib / fdatype / fdaname
+            folder.mkdir(parents=True, exist_ok=True)
+            path = folder /  fdaname
             path=str(path.resolve())
             savenode(node, path)
 
@@ -56,11 +60,11 @@ def load(path):
     exec(code)
 
 def savescene():
-    name = hou.hipFile.basename()
-    name_choice = hou.ui.readInput(message='Name Scene', buttons=('OK','Cancle'), default_choice=1, close_choice=-1, help=None, title=None, initial_contents=name)
+    fdaname= hou.hipFile.basename()
+    name_choice = hou.ui.readInput(message='fdanameScene', buttons=('OK','Cancle'), default_choice=1, close_choice=-1, help=None, title=None, initial_contents=name)
     if name_choice[0]==0:
-        name = name_choice[1]
-        folder = config.lib / name
+        fdaname = name_choice[1]
+        folder = config.lib / 'scenefiles' / fdaname
         folder.mkdir(parents=True, exist_ok=True)
         for net in config.savenetworks:
             path = folder / net
@@ -87,10 +91,10 @@ def convert_hda(node_hda=None, copy_parm_values=1):
                 node_hda = hou.selectedNodes()[0]
         source_name = node_hda.name()
         source_pos = node_hda.position()
-        source_type = node_hda.childTypeCategory().name()
+        fdatype = node_hda.childTypeCategory().name()
 
         # CHECK IF WE NEED A GEO OBJ INSTEAD OF SUBNET, BECAUSECHILDEN ARE SOP BUT PARENT IS OBJECT
-        if source_type == "Sop" and node_hda.parent().childTypeCategory().name() == "Object":
+        if fdatype == "Sop" and node_hda.parent().childTypeCategory().name() == "Object":
             my_node = node_hda.parent().createNode("geo", source_name + "_UNLOCKED",True)
         else:
             my_node = node_hda.parent().createNode("subnet",source_name + "_UNLOCKED",True)
