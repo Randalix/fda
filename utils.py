@@ -35,3 +35,12 @@ def getfdatype():
     fdatype = parent.childTypeCategory().name()
     return fdatype
 
+def collapseselection():
+    selection = hou.selectedNodes()
+    if selection:
+        parent = getparent()
+        subnet = parent.createNode("subnet", 'tmp', True)
+        hou.copyNodesTo(selection, subnet)
+        return subnet
+
+

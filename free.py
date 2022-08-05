@@ -9,7 +9,7 @@ reload(config)
 reload(utils)
 from sys import exit
 
-def savenode(node, path):
+def savenode(node, path, loose=False):
     path=str(path.resolve())
     code = node.asCode(
             brief=False,
