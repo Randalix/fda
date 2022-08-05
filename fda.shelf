@@ -24,7 +24,7 @@ print(editor)]]></script>
     <script scriptType="python"><![CDATA[from fda import free
 from imp import reload
 reload(free)
-free.save("/")
+free.save()
 ]]></script>
   </tool>
 
