@@ -30,4 +30,8 @@ def getparent():
     return parent
 
 
+def getfdatype():
+    parent = getparent()
+    fdatype = parent.childTypeCategory().name()
+    return fdatype
 

@@ -10,6 +10,7 @@ reload(utils)
 from sys import exit
 
 def savenode(node, path):
+    path=str(path.resolve())
     code = node.asCode(
             brief=False,
             recurse=True,
@@ -37,16 +38,15 @@ def savefda(nodepath=None):
         if name_choice[0]==0:
             parent = utils.getparent()
             fdaname= name_choice[1]
-            fdatype = parent.childTypeCategory().name()
+            fdatype = utils.getfdatype()
             folder = config.lib / fdatype / fdaname
             folder.mkdir(parents=True, exist_ok=True)
             path = folder /  fdaname
-            path=str(path.resolve())
             savenode(node, path)
 
 
-def load(path):
-    parent = utils.getparent().path()
+def loadfda(path):
+    parent = utils.getparent()
     file = open(path, "r")
     coderead = file.read()
     net = utils.currentNetworkEditor()
@@ -80,18 +80,23 @@ def loadscene(path):
         exec(coderead)
 
 def fdamenu():
-    import subprocess
-    p1 = subprocess.Popen(["ls", config.lib],
-     stdout=subprocess.PIPE)
-    file = subprocess.check_output(['menu'], stdin=p1.stdout).decode('utf-8').replace('\n','')
-    load(config.lib / file)
+    from subprocess import run, PIPE
+    fdatype = utils.getfdatype()
+    folder = config.lib / fdatype
+    print(folder)
+    availablefda = os.listdir(str(folder))
+    menuin = "\n".join(availablefda)
+    p = run(['menu'], stdout=PIPE,
+        input=menuin, encoding='ascii')
+    fdaname = p.stdout.replace('\n', '')
+    loadfda(folder / fdaname / fdaname)
 
 def convert_hda(node_hda=None, copy_parm_values=1):
         if not node_hda:
                 node_hda = hou.selectedNodes()[0]
         source_name = node_hda.name()
         source_pos = node_hda.position()
-        fdatype = node_hda.childTypeCategory().name()
+        fdatype = utils.getfdatype()
 
         # CHECK IF WE NEED A GEO OBJ INSTEAD OF SUBNET, BECAUSECHILDEN ARE SOP BUT PARENT IS OBJECT
         if fdatype == "Sop" and node_hda.parent().childTypeCategory().name() == "Object":
