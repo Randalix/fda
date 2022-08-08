@@ -2,11 +2,11 @@
 Instead of saving houdini assets as hda this tool saves nodes as python code and uses git for versioning.
 
 Why?
-
-All the advantages of git:
 - See changes
 - Revert changes
 - Have people collaborate and merge efforts.
+- No Licensing restrictions
+- No need to share hdas with renderfarms and colleagues.
 
 Currently every node is its own github repository. This way it's easier to rollback changes and to collaborate.
 
