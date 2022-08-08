@@ -21,3 +21,34 @@ def currentNetworkEditor():
     return editor
 
 
+
+def getparent():
+    if hou.selectedNodes():
+        parent=hou.selectedNodes()[-1].parent()
+    else:
+        parent = currentNetworkEditor().pwd()
+    return parent
+
+
+def getfdatype():
+    parent = getparent()
+    fdatype = parent.childTypeCategory().name()
+    return fdatype
+
+def collapseselection(fdaname='tmp'):
+    selection = hou.selectedNodes()
+    if selection:
+        parent = getparent()
+        subnet = parent.createNode("subnet", fdaname, True)
+        hou.copyNodesTo(selection, subnet)
+        subnet.setSelected(True)
+        return subnet
+
+def extractsubnet():
+    subnet = hou.selectedNodes()[0]
+    parent = subnet.parent()
+    children = subnet.children()
+    hou.copyNodesTo(children, parent)
+    subnet.destroy()
+
+
