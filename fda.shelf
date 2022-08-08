@@ -16,9 +16,11 @@
   </toolshelf>
 
   <tool name="test" label="Test" icon="PLASMA_App">
-    <script scriptType="python"><![CDATA[import toolutils
-editor=toolutils.networkEditor()
-print(editor)]]></script>
+    <script scriptType="python"><![CDATA[from fda import git
+from imp import reload
+reload(git)
+git.init('/home/j/caches')
+]]></script>
   </tool>
 
   <tool name="Load" label="Load" icon="PLASMA_App">
