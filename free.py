@@ -4,8 +4,10 @@ from pathlib import Path
 from fda import config
 from imp import reload
 from fda import utils
+from fda import git
 import hou
 reload(config)
+reload(git)
 reload(utils)
 from sys import exit
 
@@ -26,6 +28,10 @@ def savenode(node, path):
     node_file.write(code)
     node_file.close()
 
+# def fdaexists():
+    # exists = false
+
+
 def savefda(nodepath=None):
     loose=False
     if not nodepath:
@@ -39,11 +45,14 @@ def savefda(nodepath=None):
         fdaname= node.name()
         name_choice = hou.ui.readInput(message='fdanameFDA', buttons=('OK','Cancle'), default_choice=1, close_choice=-1, help=None, title=None, initial_contents=fdaname)
         if name_choice[0]==0:
-            parent = utils.getparent()
             fdaname= name_choice[1]
             fdatype = utils.getfdatype()
             folder = config.lib / fdatype / fdaname
-            folder.mkdir(parents=True, exist_ok=True)
+            exists = False
+            if folder.exists():
+                exists = True
+            else:
+                folder.mkdir(parents=True, exist_ok=True)
             path = folder /  fdaname
             if loose:
                 loosemark = folder /  '.loose'
@@ -52,6 +61,8 @@ def savefda(nodepath=None):
                 loose_file.close()
                 node = utils.collapseselection(fdaname)
             savenode(node, path)
+            if not exists:
+                git.init(folder)
             if loose:
                 node.destroy()
 
