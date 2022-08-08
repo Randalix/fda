@@ -13,10 +13,10 @@ Currently every node is its own github repository. This way it's easier to rollb
 
 ## Dependencies:
 - git
+- fzf https://github.com/junegunn/fzf
 
 optional (for automatic online commits):
 - hub https://github.com/github/hub
-- fzf https://github.com/junegunn/fzf
 
 If you want to automaticly upload commits to github you need git with ssh-keys, and hub to be initialized.
 
