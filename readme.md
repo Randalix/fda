@@ -2,6 +2,7 @@
 Instead of saving houdini assets as hda this tool saves nodes as python code and uses git for versioning.
 
 Why?
+
 All the advantages of git:
 - See changes
 - Revert changes
@@ -12,6 +13,7 @@ Currently every node is its own github repository. This way it's easier to rollb
 ## Install
 ### Dependencies:
 - git
+
 optional (for automatic online commits):
 - hub https://github.com/github/hub
 - fzf https://github.com/junegunn/fzf
