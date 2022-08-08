@@ -22,8 +22,11 @@ If you want to automaticly upload commits to github you need git with ssh-keys, 
 
 ## Install
 Open a terminal in the houdini python directory.
+
 Macos ~/Library/Preferences/houdini/X.Y/python3.7libs
+
 Linux ~/houdiniX.Y/python3.7libs
+
 Run 
 ```
 git clone https://github.com/Randalix/fda.git
