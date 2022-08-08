@@ -28,6 +28,6 @@ Run
 ```
 git clone https://github.com/Randalix/fda.git
 cd fda
-setup.py
+./setup.sh
 
 ```
