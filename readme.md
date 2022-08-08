@@ -10,8 +10,8 @@ All the advantages of git:
 
 Currently every node is its own github repository. This way it's easier to rollback changes and to collaborate.
 
-## Install
-### Dependencies:
+
+## Dependencies:
 - git
 
 optional (for automatic online commits):
@@ -19,6 +19,8 @@ optional (for automatic online commits):
 - fzf https://github.com/junegunn/fzf
 - 
 If you want to automaticly upload commits to github you need git with ssh-keys, and hub to be initialized.
+
+## Install
 In the houdini home directory create a folder python3.7libs. Open a Terminal there  and run Open a Terminal and run https://github.com/Randalix/fda.git
 
 
