@@ -12,6 +12,9 @@ reload(utils)
 from sys import exit
 
 def savenode(node, path):
+    '''
+        writes out the given node as python code
+    '''
     path=str(path.resolve())
     code = node.asCode(
             brief=False,
@@ -31,22 +34,35 @@ def savenode(node, path):
 # def fdaexists():
     # exists = false
 
+def markloose(folder):
+    '''
+        Creates an empty file to identify loose node collections
+    '''
+    loosemark = folder /  '.loose'
+    loose_file = open(loosemark, "w")
+    loose_file.write("")
+    loose_file.close()
+
 
 def savefda(nodepath=None):
-    loose=False
+    '''
+        Saves the node selection as FDA
+    '''
+    loose=False # Variable to check if it's a single node or a collection of  loose nodes
+    # Get Selection
     if not nodepath:
         selected = hou.selectedNodes()
         if selected:
-            nodepath = selected[-1].path()
+            nodepath = selected[0].path()
             if len(selected)>1:
                 loose=True
     if nodepath:
         node = hou.node(nodepath)
-        fdaname= node.name()
-        name_choice = hou.ui.readInput(message='fdanameFDA', buttons=('OK','Cancle'), default_choice=1, close_choice=-1, help=None, title=None, initial_contents=fdaname)
-        if name_choice[0]==0:
+        fdaname= node.name() # Default name is node name
+        name_choice = hou.ui.readInput(message='fdanameFDA', buttons=('OK','Cancle'), default_choice=1, close_choice=-1, help=None, title=None, initial_contents=fdaname) # User Input Name
+        if name_choice[0]==0: # Only proceed if pressed OK Button
             fdaname= name_choice[1]
-            fdatype = utils.getfdatype()
+            fdatype = utils.getfdatype() # Check which houdini context the nodes belonging to 
             folder = config.lib / fdatype / fdaname
             exists = False
             if folder.exists():
@@ -54,17 +70,18 @@ def savefda(nodepath=None):
             else:
                 folder.mkdir(parents=True, exist_ok=True)
             path = folder /  fdaname
-            if loose:
-                loosemark = folder /  '.loose'
-                loose_file = open(loosemark, "w")
-                loose_file.write("")
-                loose_file.close()
-                node = utils.collapseselection(fdaname)
+            if loose: # Saving just 
+                markloose(folder)
+                # If it is a loose collection of nodes we create a tmp container to bundle as single node
+                node = utils.collapseselection(fdaname) 
             savenode(node, path)
             if not exists:
                 git.init(folder)
+                print("new node")
+            else:
+                git.update(folder)
             if loose:
-                node.destroy()
+                node.destroy() # If it is a loose collection of nodes we delete the tmp container
 
 
 
@@ -158,7 +175,4 @@ def convert_hda(node_hda=None, copy_parm_values=1):
         # SHIFT NEW NODETO THE RIGHT
         new_pos = pos = (source_pos[0] +2, source_pos[1])
         my_node.setPosition(new_pos)
-
-
-        
 

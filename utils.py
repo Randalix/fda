@@ -31,6 +31,9 @@ def getparent():
 
 
 def getfdatype():
+    '''
+    Check which houdini context the nodes belonging to 
+    '''
     parent = getparent()
     fdatype = parent.childTypeCategory().name()
     return fdatype
