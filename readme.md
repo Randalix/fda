@@ -21,6 +21,4 @@ optional (for automatic online commits):
 If you want to automaticly upload commits to github you need git with ssh-keys, and hub to be initialized.
 
 ## Install
-In the houdini home directory create a folder python3.7libs. Open a Terminal there  and run Open a Terminal and run https://github.com/Randalix/fda.git
-
-
+In the houdini home directory create a folder python3.7libs. Open a Terminal there  and run Open a Terminal and run `git clone https://github.com/Randalix/fda.git`
