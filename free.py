@@ -116,14 +116,17 @@ def loadfda(path):
         coderead ='\n'.join(lines)
     code = f"hou_parent=hou.node('{parent.path()}')\n{coderead}"
     exec(code)
+    nodes = hou.selectedNodes()
     loosepath = folder / '.loose'
     if loosepath.is_file():
-        utils.extractsubnet()
+        nodes = utils.extractsubnet()
+    for node in nodes:
+        addtag(node)
 
 
 def savescene():
     fdaname= hou.hipFile.basename()
-    name_choice = hou.ui.readInput(message='fdanameScene', buttons=('OK','Cancle'), default_choice=1, close_choice=-1, help=None, title=None, initial_contents=name)
+    name_choice = hou.ui.readInput(message='fdanameScene', buttons=('OK','Cancle'), default_choice=1, close_choice=-1, help=None, title=None, initial_contents=fdaname)
     if name_choice[0]==0:
         fdaname = name_choice[1]
         folder = config.lib / 'scenefiles' / fdaname
@@ -147,4 +150,11 @@ def fdamenu():
     availablefda = os.listdir(str(folder))
     fdaname = menu(availablefda)
     loadfda(folder / fdaname / fdaname)
+
+def addtag(node):
+    group = node.parmTemplateGroup()
+    parm = hou.StringParmTemplate("__FDA", "FDA", 1, default_value=[""],  is_hidden=True, is_label_hidden=True)
+    group.append(parm)
+    node.setParmTemplateGroup(group)
+
 

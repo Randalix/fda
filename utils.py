@@ -51,7 +51,8 @@ def extractsubnet():
     subnet = hou.selectedNodes()[0]
     parent = subnet.parent()
     children = subnet.children()
-    hou.copyNodesTo(children, parent)
+    nodes = hou.copyNodesTo(children, parent)
     subnet.destroy()
+    return nodes
 
 
