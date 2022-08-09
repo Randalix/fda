@@ -10,11 +10,11 @@ reload(free)
 
 def findfdas():
     matcher = nodesearch.Parm("__FDA", "!=", "")
-    network = hou.node("/obj/")
+    networks = config.savenetworks
     fdas = []
-    for node in matcher.nodes(network, recursive=True):
-        if node:
-            fdas.append(node)
+    for net in networks:
+        matches = matcher.nodes(hou.node(net), recursive=True)
+        fdas += matches
     return fdas
 
 
