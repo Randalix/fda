@@ -19,7 +19,7 @@
     <script scriptType="python"><![CDATA[from fda import update
 from imp import reload
 reload(update)
-print(update.all())]]></script>
+update.all()]]></script>
   </tool>
 
   <tool name="Load" label="Load" icon="PLASMA_App">

@@ -123,6 +123,7 @@ def loadfda(path, parent=None):
         nodes = utils.extractsubnet()
     for node in nodes:
         addtag(node, path)
+    return nodes
 
 
 def savescene():

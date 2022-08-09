@@ -13,7 +13,8 @@ def findfdas():
     network = hou.node("/obj/")
     fdas = []
     for node in matcher.nodes(network, recursive=True):
-        fdas.append(node)
+        if node:
+            fdas.append(node)
     return fdas
 
 
@@ -21,17 +22,25 @@ def all():
     fdas = findfdas()
     for fda in fdas:
         if git.needsupdate(fda):
+            hou.clearAllSelected()
             recreate(fda)
 
-def recreate(node):
-    inputs = node.inputConnections()
-    outputs = node.outputConnections()
-    position = node.position()
-    # node.destroy()
-    fdaname = Path(node.parm("__FDA").eval().split(':')[0])
+def recreate(fda):
+    inputs = fda.inputConnections()
+    outputs = fda.outputConnections()
+    fdaname = Path(fda.parm("__FDA").eval().split(':')[0])
+    parent = fda.parent()
+    position = fda.position()
+    fda.destroy()
     path = config.lib / fdaname / fdaname.name
-    nodes = free.loadfda(path, node.parent())
+    nodes = free.loadfda(path, parent)
+    hou.clearAllSelected()
     if nodes:
-        node = nodes[0]
-        for input in inputs:
-            node.setInput(input.inputIndex(), input.inputItem(), input.outputIndex())
+        for node in nodes:
+            for input in inputs:
+                node.setInput(input.inputIndex(), input.inputItem(), input.outputIndex())
+            for output in outputs:
+                input = output.outputItem()
+                input.setInput(output.outputIndex(), node, output.outputIndex())
+            node.setPosition(position)
+
