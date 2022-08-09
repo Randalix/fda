@@ -16,11 +16,10 @@
   </toolshelf>
 
   <tool name="test" label="Test" icon="PLASMA_App">
-    <script scriptType="python"><![CDATA[from fda import free
+    <script scriptType="python"><![CDATA[from fda import update
 from imp import reload
-reload(free)
-free.menu()
-]]></script>
+reload(update)
+print(update.all())]]></script>
   </tool>
 
   <tool name="Load" label="Load" icon="PLASMA_App">

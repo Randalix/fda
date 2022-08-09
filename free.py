@@ -92,18 +92,19 @@ def savefda(nodepath=None):
             savenode(node, path)
             if not exists:
                 git.init(folder)
-                print("new node")
             else:
                 git.update(folder)
             if loose:
                 node.destroy() # If it is a loose collection of nodes we delete the tmp container
+            addtag(node, path)
 
 
 
 
-def loadfda(path):
+def loadfda(path, parent=None):
     folder = Path(path).parent
-    parent = utils.getparent()
+    if not parent:
+        parent = utils.getparent()
     file = open(path, "r")
     coderead = file.read()
     net = utils.currentNetworkEditor()
@@ -121,7 +122,7 @@ def loadfda(path):
     if loosepath.is_file():
         nodes = utils.extractsubnet()
     for node in nodes:
-        addtag(node)
+        addtag(node, path)
 
 
 def savescene():
@@ -151,10 +152,14 @@ def fdamenu():
     fdaname = menu(availablefda)
     loadfda(folder / fdaname / fdaname)
 
-def addtag(node):
-    group = node.parmTemplateGroup()
-    parm = hou.StringParmTemplate("__FDA", "FDA", 1, default_value=[""],  is_hidden=True, is_label_hidden=True)
-    group.append(parm)
-    node.setParmTemplateGroup(group)
-
-
+def addtag(node, path):
+    if not node.parm("__FDA"):
+        group = node.parmTemplateGroup()
+        parm = hou.StringParmTemplate("__FDA", "FDA", 1, default_value=[""],  is_hidden=True, is_label_hidden=True)
+        group.append(parm)
+        node.setParmTemplateGroup(group)
+    version = git.currentversion(path.parent)
+    relpath = str(path.parents[0].resolve())
+    lib = str(config.lib.resolve())
+    fdaname = relpath.replace(lib, '')[1:]
+    node.parm("__FDA").set(f"{fdaname}:{version}")
