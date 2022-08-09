@@ -15,15 +15,14 @@ def write(nodes=None, folder=None, loose=False):
             language = "None" # Save scripting Language
             try:
                 language = values["language"] = parm.expressionLanguage().name()
-            except:loose
+            except:
                 pass
             values["language"] = language
             parms[name] = values
         nodesettings["parms"] = parms
         fdanodes[f"FDA_{x}"] = nodesettings
     data["nodes"] = fdanodes
-    data["loose"] = loose
-    data["totalnodes"] = len(nodes)
+    data["nodecount"] = len(nodes)
     # writeout
     json_string = json.dumps(data, indent=4)
     settingspath = folder /  '.settings'
@@ -35,6 +34,4 @@ def read(folder):
     settingspath = folder /  '.settings'
     settingsfile = open(settingspath, "r")
     data = json.load(settingsfile)
-    loose = data["loose"]
-    parms = data["parms"]
-    return loose, parms
+    return data

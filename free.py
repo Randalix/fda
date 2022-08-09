@@ -106,7 +106,7 @@ def savefda(nodepath=None):
                 git.update(folder)
             if loose:
                 node.destroy() # If it is a loose collection of nodes we delete the tmp container
-            addtag(selected[0], path)
+            addtag(selected, path)
 
 
 
@@ -138,12 +138,11 @@ def loadfda(path, parent=None):
     nodes = hou.selectedNodes()
 
     # Read Json
-    loose, parms = settings.read(folder)
+    data = settings.read(folder)
 
-    if loose:
+    if int(data["nodecount"]) > 1:
         nodes = utils.extractsubnet()
-    for node in nodes:
-        addtag(node, path)
+    addtag(nodes, path)
     return nodes
 
 
@@ -184,14 +183,23 @@ def fdamenu():
     fdaname = menu(availablefda)
     loadfda(folder / fdaname / fdaname)
 
-def addtag(node, path):
-    if not node.parm("__FDA"):
-        group = node.parmTemplateGroup()
-        parm = hou.StringParmTemplate("__FDA", "FDA", 1, default_value=[""],  is_hidden=True, is_label_hidden=True)
+def addtag(nodes, path):
+    rootnode = nodes[-1]
+    if not rootnode.parm("__FDA"):
+        group = rootnode.parmTemplateGroup()
+        parm = hou.StringParmTemplate("__FDA", "FDA", 1, default_value=[""],  is_hidden=True)
         group.append(parm)
-        node.setParmTemplateGroup(group)
+        rootnode.setParmTemplateGroup(group)
+
+    for x, node in enumerate(nodes[:-1]):
+        group = rootnode.parmTemplateGroup()
+        parmname = f"__FDALNK-{str(x)}"
+        linkpath = f"../{node.name()}"
+        parm = hou.StringParmTemplate(parmname, parmname, 1, default_value=[linkpath], string_type=hou.stringParmType.NodeReference, tags={ "oprelative" : ".", },  is_hidden=True)
+        group.append(parm)
+        rootnode.setParmTemplateGroup(group)
     version = git.currentversion(path.parent)
     relpath = str(path.parents[0].resolve())
     lib = str(config.lib.resolve())
     fdaname = relpath.replace(lib, '')[1:]
-    node.parm("__FDA").set(f"{fdaname}:{version}")
+    rootnode.parm("__FDA").set(f"{fdaname}:{version}")
