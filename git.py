@@ -14,7 +14,13 @@ def init(path):
         run(["git",  "push", "--set-upstream", "origin", "master"], cwd=path)
 
 def update(path):
-    commit_input = ui.readInput("Commit Message", buttons=('OK', 'Cancle'))
+    commit_input = ui.readInput(
+            "Commit Message",
+            buttons=('OK',
+                'Cancle'),
+            default_choice=0,
+            close_choice=-1,
+            )
     path = str( path.resolve() )
     if commit_input[0] == 0 and commit_input[1] != "":
         commit_message = commit_input[1]
@@ -25,7 +31,7 @@ def update(path):
             run(["git",  "push", "--set-upstream", "origin", "master"], cwd=path)
         return True
     else:
-        ui.displayMessage("Commit Aborted", buttons=('OK'))
+        ui.displayMessage("Commit Aborted", buttons=('OK',))
         return False
 
 def currentversion(path):

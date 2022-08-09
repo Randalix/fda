@@ -1,16 +1,16 @@
 import os
-import sys
 from subprocess import run, PIPE
 from pathlib import Path
-from fda import config
 from imp import reload
+from fda import config
 from fda import utils
 from fda import git
-import subprocess
+from fda import settings
 import hou
 reload(config)
 reload(git)
 reload(utils)
+reload(settings)
 from sys import exit
 
 def menu(menuin):
@@ -46,17 +46,6 @@ def savenode(node, path):
     node_file.write(code)
     node_file.close()
 
-# def fdaexists():
-    # exists = false
-
-def markloose(folder):
-    '''
-        Creates an empty file to identify loose node collections
-    '''
-    loosemark = folder /  '.loose'
-    loose_file = open(loosemark, "w")
-    loose_file.write("")
-    loose_file.close()
 
 
 def savefda(nodepath=None):
@@ -71,32 +60,53 @@ def savefda(nodepath=None):
             nodepath = selected[0].path()
             if len(selected)>1:
                 loose=True
+    else:
+        selected = hou.node(nodepath)
+
     if nodepath:
         node = hou.node(nodepath)
         fdaname= node.name() # Default name is node name
-        name_choice = hou.ui.readInput(message='fdanameFDA', buttons=('OK','Cancle'), default_choice=1, close_choice=-1, help=None, title=None, initial_contents=fdaname) # User Input Name
+        # User Input Name
+        name_choice = hou.ui.readInput(
+                message='fdanameFDA',
+                buttons=('OK','Cancle'),
+                default_choice=0,
+                close_choice=-1, 
+                help=None,
+                title=None,
+                initial_contents=fdaname
+                )
+
         if name_choice[0]==0: # Only proceed if pressed OK Button
             fdaname= name_choice[1]
-            fdatype = utils.getfdatype() # Check which houdini context the nodes belonging to 
+            fdatype = utils.getfdatype() 
+
+            # Check which houdini context the nodes belonging to 
             folder = config.lib / fdatype / fdaname
+
             exists = False
             if folder.exists():
                 exists = True
             else:
                 folder.mkdir(parents=True, exist_ok=True)
+
             path = folder /  fdaname
+
+            # write json
+            settings.write(selected, folder, loose)
+
             if loose: # Saving just 
-                markloose(folder)
-                # If it is a loose collection of nodes we create a tmp container to bundle as single node
                 node = utils.collapseselection(fdaname) 
+
             savenode(node, path)
+
             if not exists:
                 git.init(folder)
             else:
                 git.update(folder)
             if loose:
                 node.destroy() # If it is a loose collection of nodes we delete the tmp container
-            addtag(node, path)
+            addtag(selected[0], path)
 
 
 
@@ -105,8 +115,14 @@ def loadfda(path, parent=None):
     folder = Path(path).parent
     if not parent:
         parent = utils.getparent()
+
+    # Read Generated Creation Code
     file = open(path, "r")
     coderead = file.read()
+
+    # Cange Creation Code
+    # Position By mode
+    # ToDo: Move to own funtion
     net = utils.currentNetworkEditor()
     if net:
         mouse_pos = utils.currentNetworkEditor().cursorPosition()
@@ -116,10 +132,15 @@ def loadfda(path, parent=None):
         lines = lines[3:]
         coderead ='\n'.join(lines)
     code = f"hou_parent=hou.node('{parent.path()}')\n{coderead}"
+
+    # Run Creation Code
     exec(code)
     nodes = hou.selectedNodes()
-    loosepath = folder / '.loose'
-    if loosepath.is_file():
+
+    # Read Json
+    loose, parms = settings.read(folder)
+
+    if loose:
         nodes = utils.extractsubnet()
     for node in nodes:
         addtag(node, path)
@@ -128,7 +149,17 @@ def loadfda(path, parent=None):
 
 def savescene():
     fdaname= hou.hipFile.basename()
-    name_choice = hou.ui.readInput(message='fdanameScene', buttons=('OK','Cancle'), default_choice=1, close_choice=-1, help=None, title=None, initial_contents=fdaname)
+    name_choice = hou.ui.readInput(
+            message='fdanameScene',
+            buttons=('OK',
+                'Cancle'
+                ),
+            default_choice=1,
+            close_choice=-1,
+            help=None,
+            title=None,
+            initial_contents=fdaname
+            )
     if name_choice[0]==0:
         fdaname = name_choice[1]
         folder = config.lib / 'scenefiles' / fdaname

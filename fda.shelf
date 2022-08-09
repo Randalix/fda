@@ -17,9 +17,10 @@
 
   <tool name="test" label="Test" icon="PLASMA_App">
     <script scriptType="python"><![CDATA[from fda import update
+from fda import settings
 from imp import reload
-reload(update)
-update.all()]]></script>
+reload(settings)
+settings.write(hou.node('/obj/geo1/testgeometry_rubbertoy1'))]]></script>
   </tool>
 
   <tool name="Load" label="Load" icon="PLASMA_App">
