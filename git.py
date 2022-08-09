@@ -1,4 +1,5 @@
 from subprocess import run
+from subprocess import check_output
 from hou import ui
 from fda import config
 
@@ -25,3 +26,8 @@ def update(path):
     else:
         ui.displayMessage("Commit Aborted", buttons=('OK'))
         return False
+
+def currentversion(path):
+    path = str( path.resolve() )
+    version = check_output([ "git", "log", '--format="%H', "-n", "1"], cwd=path)
+    return version

@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+
+OUTPUT_FILE=$HOME/.cache/menu
+INPUT_FILE=$HOME/.cache/menu_tmp
+cat > $INPUT_FILE
+$TERM -t floating -e bash -c "cat $INPUT_FILE | $FZF --preview='' > $OUTPUT_FILE"
+cat ~/.cache/menu

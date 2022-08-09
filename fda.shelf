@@ -16,10 +16,10 @@
   </toolshelf>
 
   <tool name="test" label="Test" icon="PLASMA_App">
-    <script scriptType="python"><![CDATA[from fda import git
+    <script scriptType="python"><![CDATA[from fda import free
 from imp import reload
-reload(git)
-git.init('/home/j/caches')
+reload(free)
+free.menu()
 ]]></script>
   </tool>
 

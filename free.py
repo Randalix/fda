@@ -1,15 +1,30 @@
 import os
 import sys
+from subprocess import run, PIPE
 from pathlib import Path
 from fda import config
 from imp import reload
 from fda import utils
 from fda import git
+import subprocess
 import hou
 reload(config)
 reload(git)
 reload(utils)
 from sys import exit
+
+def menu(menuin):
+    path = Path(os.path.realpath(__file__))
+    folder = path.parent
+    menu = folder / "menu"
+    os.environ["TERM"] = config.TERM
+    os.environ["FZF"] = config.FZF
+    menuin = "\n".join(menuin)
+    p = run([menu], stdout=PIPE,
+        input=menuin, encoding='ascii')
+    menout = p.stdout.replace('\n', '')
+    return menout
+
 
 def savenode(node, path):
     '''
@@ -127,13 +142,9 @@ def loadscene(path):
         exec(coderead)
 
 def fdamenu():
-    from subprocess import run, PIPE
     fdatype = utils.getfdatype()
     folder = config.lib / fdatype
     availablefda = os.listdir(str(folder))
-    menuin = "\n".join(availablefda)
-    p = run(['menu'], stdout=PIPE,
-        input=menuin, encoding='ascii')
-    fdaname = p.stdout.replace('\n', '')
+    fdaname = menu(availablefda)
     loadfda(folder / fdaname / fdaname)
 
