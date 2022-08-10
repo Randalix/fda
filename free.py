@@ -7,6 +7,7 @@ from fda import utils
 from fda import git
 from fda import settings
 import hou
+from uuid import uuid4
 reload(config)
 reload(git)
 reload(utils)
@@ -46,6 +47,15 @@ def savenode(node, path):
     node_file.write(code)
     node_file.close()
 
+def adduuid(nodes):
+    for node in nodes:
+        uuid = str(uuid4())
+        parm_name ="FDAUUID"
+        if not node.parm(parm_name):
+            group = node.parmTemplateGroup()
+            parm = hou.StringParmTemplate(parm_name, "UUID", 1, default_value=[uuid], is_hidden=True))
+            group.append(parm)
+            node.setParmTemplateGroup(group)
 
 
 def savefda(nodepath=None):
@@ -81,6 +91,7 @@ def savefda(nodepath=None):
             fdaname= name_choice[1]
             fdatype = utils.getfdatype() 
 
+            adduuid(selected)
             # Check which houdini context the nodes belonging to 
             folder = config.lib / fdatype / fdaname
 
@@ -185,21 +196,22 @@ def fdamenu():
 
 def addtag(nodes, path):
     rootnode = nodes[-1]
-    if not rootnode.parm("__FDA"):
+    if not rootnode.parm("FDA"):
         group = rootnode.parmTemplateGroup()
-        parm = hou.StringParmTemplate("__FDA", "FDA", 1, default_value=[""],  is_hidden=True)
+        parm = hou.StringParmTemplate("FDA", "FDA", 1, default_value=[""],  is_hidden=True)
         group.append(parm)
         rootnode.setParmTemplateGroup(group)
 
     for x, node in enumerate(nodes[:-1]):
-        group = rootnode.parmTemplateGroup()
-        parmname = f"__FDALNK-{str(x)}"
-        linkpath = f"../{node.name()}"
-        parm = hou.StringParmTemplate(parmname, parmname, 1, default_value=[linkpath], string_type=hou.stringParmType.NodeReference, tags={ "oprelative" : ".", },  is_hidden=True)
-        group.append(parm)
-        rootnode.setParmTemplateGroup(group)
+        parmname = f"FDALNK{str(x)}"
+        if not node.parm(parmname):
+            group = rootnode.parmTemplateGroup()
+            linkpath = f"../{node.name()}"
+            parm = hou.StringParmTemplate(parmname, parmname, 1, default_value=[linkpath], string_type=hou.stringParmType.NodeReference, tags={ "oprelative" : ".", },  is_hidden=True)
+            group.append(parm)
+            rootnode.setParmTemplateGroup(group)
     version = git.currentversion(path.parent)
     relpath = str(path.parents[0].resolve())
     lib = str(config.lib.resolve())
     fdaname = relpath.replace(lib, '')[1:]
-    rootnode.parm("__FDA").set(f"{fdaname}:{version}")
+    rootnode.parm("FDA").set(f"{fdaname}:{version}")

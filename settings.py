@@ -20,7 +20,8 @@ def write(nodes=None, folder=None, loose=False):
             values["language"] = language
             parms[name] = values
         nodesettings["parms"] = parms
-        fdanodes[f"FDA_{x}"] = nodesettings
+        uuid = node.parm("FDAUUID").eval()
+        fdanodes[uuid] = nodesettings
     data["nodes"] = fdanodes
     data["nodecount"] = len(nodes)
     # writeout

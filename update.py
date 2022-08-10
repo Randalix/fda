@@ -9,7 +9,7 @@ reload(git)
 reload(free)
 
 def findfdas():
-    matcher = nodesearch.Parm("__FDA", "!=", "")
+    matcher = nodesearch.Parm("FDA", "!=", "")
     networks = config.savenetworks
     fdas = []
     for net in networks:
@@ -28,7 +28,7 @@ def all():
 def recreate(fda):
     inputs = fda.inputConnections()
     outputs = fda.outputConnections()
-    fdaname = Path(fda.parm("__FDA").eval().split(':')[0])
+    fdaname = Path(fda.parm("FDA").eval().split(':')[0])
     parent = fda.parent()
     position = fda.position()
     fda.destroy()

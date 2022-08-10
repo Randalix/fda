@@ -40,7 +40,7 @@ def currentversion(path):
     return version
 
 def needsupdate(node):
-    tag = node.parm("__FDA").eval().split(":")
+    tag = node.parm("FDA").eval().split(":")
     version = tag[1]
     path = Path(config.lib / tag[0])
     if version != currentversion(path) and version != "":
