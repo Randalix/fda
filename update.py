@@ -8,9 +8,8 @@ from pathlib import Path
 reload(git)
 reload(free)
 
-def findfdas():
+def findfdas(networks=config.savenetworks):
     matcher = nodesearch.Parm("FDA", "!=", "")
-    networks = config.savenetworks
     fdas = []
     for net in networks:
         matches = matcher.nodes(hou.node(net), recursive=True)
@@ -25,14 +24,28 @@ def all():
             hou.clearAllSelected()
             recreate(fda)
 
-def recreate(fda):
-    inputs = fda.inputConnections()
-    outputs = fda.outputConnections()
-    fdaname = Path(fda.parm("FDA").eval().split(':')[0])
-    parent = fda.parent()
-    position = fda.position()
-    fda.destroy()
+def selectedtype():
+    selected = hou.selectedNodes()
+    for node in selected:
+        fdaparm = node.parm("FDA")
+        if fdaparm:
+            name = fdaparm.eval().split(":")[0]
+            searchPattern = f"{name}:*"
+            matcher = nodesearch.Parm("FDA", "~=", searchPattern)
+            matches = matcher.nodes(hou.node("/obj"), recursive=True)
+            for fda in matches:
+                if git.needsupdate(fda):
+                    recreate(fda)
+
+def recreate(node):
+    inputs = node.inputConnections()
+    outputs = node.outputConnections()
+    fdaname = Path(node.parm("FDA").eval().split(':')[0])
+    parent = node.parent()
+    position = node.position()
+    node.destroy()
     path = config.lib / fdaname / fdaname.name
+    hou.clearAllSelected()
     nodes = free.loadfda(path, parent)
     hou.clearAllSelected()
     if nodes:
