@@ -69,7 +69,7 @@ def getrootnode(nodes):
         rootnode = nodes[0]
     return rootnode
 
-def fdaName(node):
+def get_fda_name(node):
     fdaName = None
     parm = node.parm("FDA")
     if parm:
@@ -79,7 +79,7 @@ def fdaName(node):
 def getfdaname(node):
     parm = node.parm("FDA")
     if parm:
-        fdaName = fdaName(node)
+        fdaName = get_fda_name(node)
     else:
         fdaName = node.name()
     # User Input Name
