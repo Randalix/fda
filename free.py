@@ -69,12 +69,19 @@ def getrootnode(nodes):
         rootnode = nodes[0]
     return rootnode
 
+def fdaName(node):
+    fdaName = None
+    parm = node.parm("FDA")
+    if parm:
+        fdaName = parm.eval().split(":")[0].split("/")[-1]
+    return fdaName
+
 def getfdaname(node):
     parm = node.parm("FDA")
     if parm:
-        fdaname = parm.eval().split(":")[0].split("/")[-1]
+        fdaName = fdaName(node)
     else:
-        fdaname = node.name()
+        fdaName = node.name()
     # User Input Name
     name_choice = hou.ui.readInput(
             message='fdanameFDA',
@@ -83,13 +90,13 @@ def getfdaname(node):
             close_choice=-1, 
             help=None,
             title=None,
-            initial_contents=fdaname
+            initial_contents=fdaName
             )
     if name_choice[0]==0: # Only proceed if pressed OK Button
-        fdaname= name_choice[1]
+        fdaName= name_choice[1]
     else:
         exit
-    return fdaname
+    return fdaName
 
 def savefda(nodepath=None):
     '''
@@ -105,11 +112,11 @@ def savefda(nodepath=None):
 
     loose = isloose(nodes)
     rootnode = getrootnode(nodes)
-    fdaname = getfdaname(rootnode)
+    fdaName = getfdaname(rootnode)
     fdatype = utils.getfdatype() 
 
     # Check which houdini context the nodes belonging to 
-    folder = config.lib / fdatype / fdaname
+    folder = config.lib / fdatype / fdaName
 
     exists = False
     if folder.exists():
@@ -117,7 +124,7 @@ def savefda(nodepath=None):
     else:
         folder.mkdir(parents=True, exist_ok=True)
 
-    path = folder /  fdaname
+    path = folder /  fdaName
 
     adduuid(nodes)
     # write json
@@ -126,7 +133,7 @@ def savefda(nodepath=None):
     node = rootnode
 
     if loose: # Saving just 
-        rootnode = utils.collapseselection(fdaname) 
+        rootnode = utils.collapseselection(fdaName) 
 
     savenode(rootnode, path)
 
@@ -140,7 +147,7 @@ def savefda(nodepath=None):
     addfdaparm(node, path)
     # addtag(nodes, path, nodes[0].parm("FDAUUID").eval())
 
-def motherandchildren(nodes, motheruuid):
+def nodesplitchilds(nodes, motheruuid):
     rootnode = nodes[-1]
     for node in nodes:
         uuidparm = node.parm("FDAUUID")
@@ -152,7 +159,7 @@ def motherandchildren(nodes, motheruuid):
     children = [node for node in nodes if node != rootnode]
     return rootnode, children
 
-def loadfda(path, parent=None):
+def loadfda(path, parent=None, pos=hou.Vector2(0,0)):
     folder = Path(path).parent
     if not parent:
         parent = utils.getparent()
@@ -164,17 +171,18 @@ def loadfda(path, parent=None):
     # Cange Creation Code
     # Position By mode
     # ToDo: Move to own funtion
-    net = utils.currentNetworkEditor()
-    if net:
-        mouse_pos = utils.currentNetworkEditor().cursorPosition()
-        move = f"hou_node.move(hou.Vector2({mouse_pos}))"
-        lines = coderead.split("\n")
-        lines[6] = move
-        lines = lines[3:]
-        coderead ='\n'.join(lines)
+    # net = utils.currentNetworkEditor()
+    # if net:
+        # mouse_pos = utils.currentNetworkEditor().cursorPosition()
+    lines = coderead.split("\n")
+    move = f"hou_node.move(hou.Vector2(0.0,0.0))"
+    lines[6] = move
+    lines = lines[3:]
+    coderead ='\n'.join(lines)
     code = f"hou_parent=hou.node('{parent.path()}')\n{coderead}"
 
     # Run Creation Code
+    hou.clearAllSelected()
     exec(code)
     nodes = hou.selectedNodes()
 
@@ -184,14 +192,25 @@ def loadfda(path, parent=None):
 
     if int(data["nodecount"]) > 1:
         nodes = utils.extractsubnet()
-    rootnode, children = motherandchildren(nodes, rootid)
+    rootnode, children = nodesplitchilds(nodes, rootid)
+
     addlinks(rootnode, children)
     addfdaparm(rootnode, path)
+    position_children(rootnode, children, pos)
     return nodes
+
+def position_children(root, children, pos):
+    rootpos = root.position()
+    allnodes = [root] + children
+    for node in allnodes:
+        nodepos = node.position()
+        delta = nodepos - rootpos
+        goalpos = pos + delta
+        node.setPosition(goalpos)
 
 
 def savescene():
-    fdaname= hou.hipFile.basename()
+    fdaName= hou.hipFile.basename()
     name_choice = hou.ui.readInput(
             message='fdanameScene',
             buttons=('OK',
@@ -201,11 +220,11 @@ def savescene():
             close_choice=-1,
             help=None,
             title=None,
-            initial_contents=fdaname
+            initial_contents=fdaName
             )
     if name_choice[0]==0:
-        fdaname = name_choice[1]
-        folder = config.lib / 'scenefiles' / fdaname
+        fdaName = name_choice[1]
+        folder = config.lib / 'scenefiles' / fdaName
         folder.mkdir(parents=True, exist_ok=True)
         for net in config.savenetworks:
             path = folder / net
@@ -221,11 +240,12 @@ def loadscene(path):
         exec(coderead)
 
 def fdamenu():
+    mouse_pos = utils.currentNetworkEditor().cursorPosition()
     fdatype = utils.getfdatype()
     folder = config.lib / fdatype
     availablefda = os.listdir(str(folder))
-    fdaname = menu(availablefda)
-    loadfda(folder / fdaname / fdaname)
+    fdaName = menu(availablefda)
+    loadfda(folder / fdaName / fdaName,  pos=mouse_pos)
 
 def addlinks(rootnode, children):
     for x, node in enumerate(children):
@@ -246,8 +266,8 @@ def addfdaparm(rootnode, path):
     version = git.currentversion(path.parent)
     relpath = str(path.parents[0].resolve())
     lib = str(config.lib.resolve())
-    fdaname = relpath.replace(lib, '')[1:]
-    rootnode.parm("FDA").set(f"{fdaname}:{version}")
+    fdaName = relpath.replace(lib, '')[1:]
+    rootnode.parm("FDA").set(f"{fdaName}:{version}")
 
 def adduuid(nodes):
     for node in nodes:
