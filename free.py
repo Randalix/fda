@@ -186,6 +186,7 @@ def loadfda(path, parent=None):
         nodes = utils.extractsubnet()
     rootnode, children = motherandchildren(nodes, rootid)
     addlinks(rootnode, children)
+    addfdaparm(rootnode, path)
     return nodes
 
 
