@@ -52,77 +52,93 @@ def savenode(node, path):
     node_file.write(code)
     node_file.close()
 
-def adduuid(nodes):
-    for node in nodes:
-        uuid = str(uuid4())
-        parm_name ="FDAUUID"
-        if not node.parm(parm_name):
-            group = node.parmTemplateGroup()
-            parm = hou.StringParmTemplate(parm_name, "UUID", 1, default_value=[uuid], is_hidden=True)
-            group.append(parm)
-            node.setParmTemplateGroup(group)
 
+def isloose(selected):
+    loose=False
+    if len(selected)>1:
+        loose=True
+    return loose
+
+def getrootnode(nodes):
+    rootnode = None
+    for node in nodes:
+        if node.parm("FDA"):
+            rootnode = node
+            break
+    if not rootnode:
+        rootnode = nodes[0]
+    return rootnode
+
+def getfdaname(node):
+    parm = node.parm("FDA")
+    if parm:
+        fdaname = parm.eval().split(":")[0].split("/")[-1]
+    else:
+        fdaname = node.name()
+    # User Input Name
+    name_choice = hou.ui.readInput(
+            message='fdanameFDA',
+            buttons=('OK','Cancle'),
+            default_choice=0,
+            close_choice=-1, 
+            help=None,
+            title=None,
+            initial_contents=fdaname
+            )
+    if name_choice[0]==0: # Only proceed if pressed OK Button
+        fdaname= name_choice[1]
+    else:
+        exit
+    return fdaname
 
 def savefda(nodepath=None):
     '''
         Saves the node selection as FDA
     '''
-    loose=False # Variable to check if it's a single node or a collection of  loose nodes
     # Get Selection
     if not nodepath:
-        selected = hou.selectedNodes()
-        if selected:
-            nodepath = selected[0].path()
-            if len(selected)>1:
-                loose=True
+        nodes = hou.selectedNodes()
+        if not nodes:
+            exit
     else:
-        selected = hou.node(nodepath)
+        nodes = [hou.node(nodepath)]
 
-    if nodepath:
-        node = hou.node(nodepath)
-        fdaname= node.name() # Default name is node name
-        # User Input Name
-        name_choice = hou.ui.readInput(
-                message='fdanameFDA',
-                buttons=('OK','Cancle'),
-                default_choice=0,
-                close_choice=-1, 
-                help=None,
-                title=None,
-                initial_contents=fdaname
-                )
+    loose = isloose(nodes)
+    rootnode = getrootnode(nodes)
+    fdaname = getfdaname(rootnode)
+    fdatype = utils.getfdatype() 
 
-        if name_choice[0]==0: # Only proceed if pressed OK Button
-            fdaname= name_choice[1]
-            fdatype = utils.getfdatype() 
+    # Check which houdini context the nodes belonging to 
+    folder = config.lib / fdatype / fdaname
 
-            adduuid(selected)
-            # Check which houdini context the nodes belonging to 
-            folder = config.lib / fdatype / fdaname
+    exists = False
+    if folder.exists():
+        exists = True
+    else:
+        folder.mkdir(parents=True, exist_ok=True)
 
-            exists = False
-            if folder.exists():
-                exists = True
-            else:
-                folder.mkdir(parents=True, exist_ok=True)
+    path = folder /  fdaname
 
-            path = folder /  fdaname
+    adduuid(nodes)
+    # write json
+    settings.write(nodes, folder, loose)
 
-            # write json
-            settings.write(selected, folder, loose)
+    node = rootnode
 
-            if loose: # Saving just 
-                node = utils.collapseselection(fdaname) 
+    if loose: # Saving just 
+        rootnode = utils.collapseselection(fdaname) 
 
-            savenode(node, path)
+    savenode(rootnode, path)
 
-            if not exists:
-                git.init(folder)
-            else:
-                git.update(folder)
-            if loose:
-                node.destroy() # If it is a loose collection of nodes we delete the tmp container
-            addtag(selected, path, selected[0].parm("FDAUUID").eval())
+    if not exists:
+        git.init(folder)
+    else:
+        git.update(folder)
+
+    if loose:
+        rootnode.destroy() # If it is a loose collection of nodes we delete the tmp container
+    addfdaparm(node, path)
+    # addtag(nodes, path, nodes[0].parm("FDAUUID").eval())
 
 
 
@@ -200,7 +216,7 @@ def fdamenu():
     fdaname = menu(availablefda)
     loadfda(folder / fdaname / fdaname)
 
-def addtag(nodes, path, mother):
+def addlinks(nodes, path, mother):
     rootnode = nodes[-1]
     for node in nodes:
         uuidparm = node.parm("FDAUUID")
@@ -223,8 +239,25 @@ def addtag(nodes, path, mother):
             parm = hou.StringParmTemplate(parmname, parmname, 1, default_value=[linkpath], string_type=hou.stringParmType.NodeReference, tags={ "oprelative" : ".", },  is_hidden=True)
             group.append(parm)
             rootnode.setParmTemplateGroup(group)
+
+def addfdaparm(rootnode, path):
+    if not rootnode.parm("FDA"):
+        group = rootnode.parmTemplateGroup()
+        parm = hou.StringParmTemplate("FDA", "FDA", 1, default_value=[""],  is_hidden=True)
+        group.append(parm)
+        rootnode.setParmTemplateGroup(group)
     version = git.currentversion(path.parent)
     relpath = str(path.parents[0].resolve())
     lib = str(config.lib.resolve())
     fdaname = relpath.replace(lib, '')[1:]
     rootnode.parm("FDA").set(f"{fdaname}:{version}")
+
+def adduuid(nodes):
+    for node in nodes:
+        uuid = str(uuid4())
+        parm_name ="FDAUUID"
+        if not node.parm(parm_name):
+            group = node.parmTemplateGroup()
+            parm = hou.StringParmTemplate(parm_name, "UUID", 1, default_value=[uuid], is_hidden=True)
+            group.append(parm)
+            node.setParmTemplateGroup(group)
