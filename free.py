@@ -13,6 +13,11 @@ reload(git)
 reload(utils)
 reload(settings)
 from sys import exit
+def removeValue(givenlist, value):
+    # removing the value using remove()
+    givenlist.remove(value)
+    # return the list
+    return givenlist
 
 def menu(menuin):
     path = Path(os.path.realpath(__file__))
@@ -53,7 +58,7 @@ def adduuid(nodes):
         parm_name ="FDAUUID"
         if not node.parm(parm_name):
             group = node.parmTemplateGroup()
-            parm = hou.StringParmTemplate(parm_name, "UUID", 1, default_value=[uuid], is_hidden=True))
+            parm = hou.StringParmTemplate(parm_name, "UUID", 1, default_value=[uuid], is_hidden=True)
             group.append(parm)
             node.setParmTemplateGroup(group)
 
@@ -117,7 +122,7 @@ def savefda(nodepath=None):
                 git.update(folder)
             if loose:
                 node.destroy() # If it is a loose collection of nodes we delete the tmp container
-            addtag(selected, path)
+            addtag(selected, path, selected[0].parm("FDAUUID").eval())
 
 
 
@@ -150,10 +155,11 @@ def loadfda(path, parent=None):
 
     # Read Json
     data = settings.read(folder)
+    mother = data["mother"]
 
     if int(data["nodecount"]) > 1:
         nodes = utils.extractsubnet()
-    addtag(nodes, path)
+    addtag(nodes, path, mother)
     return nodes
 
 
@@ -194,15 +200,22 @@ def fdamenu():
     fdaname = menu(availablefda)
     loadfda(folder / fdaname / fdaname)
 
-def addtag(nodes, path):
+def addtag(nodes, path, mother):
     rootnode = nodes[-1]
+    for node in nodes:
+        uuidparm = node.parm("FDAUUID")
+        if uuidparm:
+            if node.parm("FDAUUID").eval() == mother:
+                rootnode = node
+                break
+    children = removeValue(nodes, rootnode)
     if not rootnode.parm("FDA"):
         group = rootnode.parmTemplateGroup()
         parm = hou.StringParmTemplate("FDA", "FDA", 1, default_value=[""],  is_hidden=True)
         group.append(parm)
         rootnode.setParmTemplateGroup(group)
 
-    for x, node in enumerate(nodes[:-1]):
+    for x, node in enumerate(children):
         parmname = f"FDALNK{str(x)}"
         if not node.parm(parmname):
             group = rootnode.parmTemplateGroup()
