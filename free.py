@@ -140,8 +140,17 @@ def savefda(nodepath=None):
     addfdaparm(node, path)
     # addtag(nodes, path, nodes[0].parm("FDAUUID").eval())
 
+def motherandchildren(nodes, motheruuid):
+    rootnode = nodes[-1]
+    for node in nodes:
+        uuidparm = node.parm("FDAUUID")
+        if uuidparm:
+            if node.parm("FDAUUID").eval() == motheruuid:
+                rootnode = node
+                break
 
-
+    children = [node for node in nodes if node != rootnode]
+    return rootnode, children
 
 def loadfda(path, parent=None):
     folder = Path(path).parent
@@ -171,11 +180,12 @@ def loadfda(path, parent=None):
 
     # Read Json
     data = settings.read(folder)
-    mother = data["mother"]
+    rootid = data["mother"]
 
     if int(data["nodecount"]) > 1:
         nodes = utils.extractsubnet()
-    addtag(nodes, path, mother)
+    rootnode, children = motherandchildren(nodes, rootid)
+    addlinks(rootnode, children)
     return nodes
 
 
@@ -216,21 +226,7 @@ def fdamenu():
     fdaname = menu(availablefda)
     loadfda(folder / fdaname / fdaname)
 
-def addlinks(nodes, path, mother):
-    rootnode = nodes[-1]
-    for node in nodes:
-        uuidparm = node.parm("FDAUUID")
-        if uuidparm:
-            if node.parm("FDAUUID").eval() == mother:
-                rootnode = node
-                break
-    children = removeValue(nodes, rootnode)
-    if not rootnode.parm("FDA"):
-        group = rootnode.parmTemplateGroup()
-        parm = hou.StringParmTemplate("FDA", "FDA", 1, default_value=[""],  is_hidden=True)
-        group.append(parm)
-        rootnode.setParmTemplateGroup(group)
-
+def addlinks(rootnode, children):
     for x, node in enumerate(children):
         parmname = f"FDALNK{str(x)}"
         if not node.parm(parmname):
