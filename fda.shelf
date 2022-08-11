@@ -13,14 +13,15 @@
     <memberTool name="Load Scene"/>
     <memberTool name="FDA Menu"/>
     <memberTool name="Collapse to Subnet"/>
+    <memberTool name="Update Selcted"/>
   </toolshelf>
 
   <tool name="test" label="Test" icon="PLASMA_App">
     <script scriptType="python"><![CDATA[from fda import update
 from fda import settings
 from imp import reload
-reload(settings)
-settings.write(hou.node('/obj/geo1/testgeometry_rubbertoy1'))]]></script>
+reload(update)
+update.selectedtype()]]></script>
   </tool>
 
   <tool name="Load" label="Load" icon="PLASMA_App">
@@ -97,5 +98,13 @@ free.savefda()
 from imp import reload
 reload(utils)
 utils.collapseselection()]]></script>
+  </tool>
+
+  <tool name="Update Selcted" label="Update Selcted" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[from fda import update
+from fda import settings
+from imp import reload
+reload(update)
+update.selectedtype()]]></script>
   </tool>
 </shelfDocument>
