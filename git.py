@@ -34,7 +34,7 @@ def update(path):
         ui.displayMessage("Commit Aborted", buttons=('OK',))
         return False
 
-def currentversion(path):
+def currentVersion(path):
     path = str( path.resolve() )
     version = check_output([ "git", "log", '--format="%H', "-n", "1"], cwd=path).decode("utf-8").replace('\n', '')[1:]
     return version
@@ -43,7 +43,8 @@ def needsupdate(node):
     tag = node.parm("FDA").eval().split(":")
     version = tag[1]
     path = Path(config.lib / tag[0])
-    if version != currentversion(path) and version != "":
+    currentversion = currentVersion(path)
+    if version != currentversion and version != "":
         return True
     else:
         return False

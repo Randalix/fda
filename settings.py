@@ -1,4 +1,6 @@
 import json
+from fda import git
+from shutil import copy
 
 def write(nodes=None, folder=None, loose=False):
     data = {} # Main Dict
@@ -32,13 +34,22 @@ def write(nodes=None, folder=None, loose=False):
     data["mother"] = mother
     # writeout
     json_string = json.dumps(data, indent=4)
-    settingspath = folder /  '.settings'
+    settingsfolder = folder /  'settings' 
+    settingspath = settingsfolder / 'settings'
+    settingsfolder.mkdir(parents=True, exist_ok=True)
     settingsfile = open(settingspath, "w")
     settingsfile.write(json_string)
     settingsfile.close()
 
-def read(folder):
-    settingspath = folder /  '.settings'
+def backup(folder):
+    settingsfolder = folder /  'settings' 
+    settingspath = settingsfolder / 'settings'
+    version = git.currentversion(folder)
+    settings_commit_path = settingsfolder / version
+    copy(str(settingspath), str(settings_commit_path))
+
+def read(folder, name="settings"):
+    settingspath = folder /  'settings' / name
     settingsfile = open(settingspath, "r")
     data = json.load(settingsfile)
     return data

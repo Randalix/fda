@@ -1,12 +1,14 @@
 import hou
 import nodesearch
-from fda import git
-from fda import free
 from imp import reload
+from fda import git
+from fda import settings
+from fda import free
 from fda import config
 from pathlib import Path
 reload(git)
 reload(free)
+reload(settings)
 
 def findfdas(networks=config.savenetworks):
     matcher = nodesearch.Parm("FDA", "!=", "")
@@ -37,10 +39,55 @@ def selectedtype():
                 if git.needsupdate(fda):
                     recreate(fda)
 
+# def update_parms(node, data):
+    # uuid = node.parm("FDAUUID").eval()
+    # default_parms = data["nodes"][uuid]["parms"]
+    # parms = node.parms()
+    # saved_parms = default_parms.keys()
+    # ignore_parms = ["FDA", "FDAUUID", "FDALNK"]
+    # for parm in parms:
+        # parm_name = parm.name()
+        # if parm_name in saved_parms and parm_name not in ignore_parms:
+            # default_value = default_parms[parm_name]["value"]
+            # value = parm.rawValue()
+            # print(parm_name)
+            # print(value, default_value)
+
+def readparms(node):
+    node_settings = {}
+    for parm in node.parm():
+        node_settings[parm.name()] = parm.rawValue()
+    return node_settings
+
+def non_default_parms(node, fdaname, fdaversion):
+    data = settings.read(config.lib / fdaname, fdaversion)
+    uuid = node.parm("FDAUUID").eval()
+    default_parms = data["nodes"][uuid]["parms"]
+    parms = node.parms()
+    saved_parms = default_parms.keys()
+    ignore_parms = ["FDA", "FDAUUID", "FDALNK"]
+    parm_override_dict = {}
+    for parm in parms:
+        parm_name = parm.name()
+        if parm_name in saved_parms and parm_name not in ignore_parms:
+            default_value = default_parms[parm_name]["value"]
+            value = parm.rawValue()
+            if value != default_value:
+                parm_override_dict[parm_name] = value
+
+    return parm_override_dict
+
+def reapply_custom_changes(node,override_parms):
+    for parm in override_parms:
+        node.parm(parm).set(override_parms[parm])
+
+
 def recreate(node):
     inputs = node.inputConnections()
     outputs = node.outputConnections()
     fdaname = Path(node.parm("FDA").eval().split(':')[0])
+    fdaversion = node.parm("FDA").eval().split(':')[1]
+    override_parms = non_default_parms(node, fdaname, fdaversion)
     parent = node.parent()
     position = node.position()
     node.destroy()
@@ -56,4 +103,5 @@ def recreate(node):
                 input = output.outputItem()
                 input.setInput(output.outputIndex(), node, output.outputIndex())
             node.setPosition(position)
+            reapply_custom_changes(node, override_parms)
 

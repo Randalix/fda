@@ -13,6 +13,7 @@ reload(git)
 reload(utils)
 reload(settings)
 from sys import exit
+
 def removeValue(givenlist, value):
     # removing the value using remove()
     givenlist.remove(value)
@@ -145,7 +146,9 @@ def savefda(nodepath=None):
     if loose:
         rootnode.destroy() # If it is a loose collection of nodes we delete the tmp container
     addfdaparm(node, path)
-    # addtag(nodes, path, nodes[0].parm("FDAUUID").eval())
+    settings.backup(folder)
+
+
 
 def nodesplitchilds(nodes, motheruuid):
     rootnode = nodes[-1]
