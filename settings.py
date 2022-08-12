@@ -2,7 +2,7 @@ import json
 from fda import git
 from shutil import copy
 
-def write(nodes=None, folder=None, loose=False):
+def write(nodes=None, folder=None, loose=False, fdatype=None):
     data = {} # Main Dict
     fdanodes = {} # Included Nodes
     mother = None
@@ -32,6 +32,7 @@ def write(nodes=None, folder=None, loose=False):
     data["nodes"] = fdanodes
     data["nodecount"] = len(nodes)
     data["mother"] = mother
+    data["type"] = fdatype
     # writeout
     json_string = json.dumps(data, indent=4)
     settingsfolder = folder /  'settings' 

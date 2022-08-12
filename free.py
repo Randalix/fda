@@ -129,7 +129,7 @@ def savefda(nodepath=None):
 
     adduuid(nodes)
     # write json
-    settings.write(nodes, folder, loose)
+    settings.write(nodes, folder, loose, fdatype)
 
     node = rootnode
 
